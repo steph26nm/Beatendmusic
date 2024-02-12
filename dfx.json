@@ -1,0 +1,30 @@
+{
+  "canisters": {
+    "beatend_backend": {
+      "candid": "src/beatend_backend/beatend_backend.did",
+      "package": "beatend_backend",
+      "type": "rust"
+    },
+    "beatend_frontend": {
+      "dependencies": [
+        "beatend_backend"
+      ],
+      "frontend": {
+        "entrypoint": "src/beatend_frontend/src/index.html"
+      },
+      "source": [
+        "src/beatend_frontend/assets",
+        "dist/beatend_frontend/"
+      ],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

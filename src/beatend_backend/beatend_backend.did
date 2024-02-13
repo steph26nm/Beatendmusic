@@ -1,3 +1,38 @@
+type Producer = {
+    id: nat;
+    username: text;
+    // Add more fields as needed
+};
+
+type BeatProducer = {
+    id: nat;
+    username: text;
+    // Add more fields as needed
+};
+
+type Artist = {
+    id: nat;
+    username: text;
+    // Add more fields as needed
+};
+
+type Coach = {
+    id: nat;
+    username: text;
+    // Add more fields as needed
+};
+
+type Studio = {
+    id: nat;
+    name: text;
+    // Add more fields as needed
+};
+
 service : {
-    "greet": (text) -> (text) query;
+    "user_register": (
+        username: text,
+        title: text,
+        purpose: text
+    ) -> (text) query;
+    // Add more services as needed
 }

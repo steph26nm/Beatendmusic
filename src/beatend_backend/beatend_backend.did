@@ -1,38 +1,17 @@
-type Producer = {
-    id: nat;
-    username: text;
-    // Add more fields as needed
-};
-
-type BeatProducer = {
-    id: nat;
-    username: text;
-    // Add more fields as needed
-};
-
-type Artist = {
-    id: nat;
-    username: text;
-    // Add more fields as needed
-};
-
-type Coach = {
-    id: nat;
-    username: text;
-    // Add more fields as needed
-};
-
-type Studio = {
-    id: nat;
+type User = {
     name: text;
-    // Add more fields as needed
+    email: text;
 };
 
-service : {
-    "user_register": (
-        username: text,
-        title: text,
-        purpose: text
-    ) -> (text) query;
-    // Add more services as needed
+type message = {
+    sender_id: User;
+    receiver_id: User;
+    content: text;
+};
+
+service: {
+    "backbeat_register": (name: text, email: text) -> (User);
+    "send_message": (sender_id: User,receiver_id: User,content: text) -> (text);
+    "get_messages": (user: User) -> (vec Message);
 }
+

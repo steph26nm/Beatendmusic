@@ -1,0 +1,100 @@
+use ic_cdk::{CandidType, Principal};
+use ic_cdk::storage;
+use std::collections::HashMap;
+
+// Define the SearchWarrant struct
+#[derive(CandidType)]
+struct SearchWarrant {
+    owner: Principal,
+    executed: bool,
+}
+
+impl SearchWarrant {
+    fn new(owner: Principal) -> Self {
+        SearchWarrant {
+            owner,
+            executed: false,
+        }
+    }
+
+    fn execute(&mut self, caller: Principal) -> Result<(), String> {
+        if self.owner == caller {
+            if !self.executed {
+                self.executed = true;
+                Ok(())
+            } else {
+                Err("Search warrant has already been executed".to_string())
+            }
+        } else {
+            Err("Only the owner can execute the search warrant".to_string())
+        }
+    }
+}
+
+// Define the SearchWarrantCanister
+#[derive(Default)]
+struct SearchWarrantCanister {
+    warrants: storage::HashMap<Principal, SearchWarrant>,
+}
+
+impl SearchWarrantCanister {
+    fn create_warrant(&mut self, caller: Principal) {
+        let warrant = SearchWarrant::new(caller);
+        self.warrants.insert(caller, warrant);
+    }
+
+    fn execute_warrant(&mut self, caller: Principal) -> Result<(), String> {
+        if let Some(mut warrant) = self.warrants.get_mut(&caller) {
+            warrant.execute(caller)
+        } else {
+            Err("Search warrant not found".to_string())
+        }
+    }
+}
+
+// Define the CounterfeitGoodsCanister
+#[derive(Default)]
+struct CounterfeitGoodsCanister {
+    counterfeit_owners: storage::BTreeSet<Principal>,
+    search_warrant_canister: Principal,
+}
+
+impl CounterfeitGoodsCanister {
+    fn add_counterfeit_owner(&mut self, owner: Principal) {
+        self.counterfeit_owners.insert(owner);
+    }
+
+    fn trigger_search_warrant_execution(&self) {
+        for owner in &self.counterfeit_owners {
+            let _ = ic_cdk::call::call(
+                self.search_warrant_canister.clone(),
+                "execute_search_warrant",
+                (),
+            );
+        }
+    }
+}
+
+#[ic_cdk_macros::canister]
+impl SearchWarrantCanister {
+    pub fn create_search_warrant(&mut self) {
+        let caller = ic_cdk::caller();
+        self.create_warrant(caller);
+    }
+
+    pub fn execute_search_warrant(&mut self) -> Result<(), String> {
+        let caller = ic_cdk::caller();
+        self.execute_warrant(caller)
+    }
+}
+
+#[ic_cdk_macros::canister]
+impl CounterfeitGoodsCanister {
+    pub fn report_counterfeit_goods(&mut self, owner: Principal) {
+        self.add_counterfeit_owner(owner);
+    }
+
+    pub fn execute_search_warrants_for_counterfeit_goods(&self) {
+        self.trigger_search_warrant_execution();
+    }
+}
